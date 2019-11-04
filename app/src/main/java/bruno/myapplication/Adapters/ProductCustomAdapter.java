@@ -4,8 +4,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,17 +17,18 @@ import com.android.volley.toolbox.NetworkImageView;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import bruno.myapplication.Entities.ProductEntity;
 import bruno.myapplication.R;
-import bruno.myapplication.api.ApiConnection;
+import bruno.myapplication.Api.ApiConnection;
 import bruno.myapplication.model.Product;
 
 public class ProductCustomAdapter extends RecyclerView.Adapter<ProductCustomAdapter.ViewHolder>{
 
     private final Context mContext;
-    private ArrayList<Product> mDataSet;
+    private ArrayList<ProductEntity> mDataSet;
 
 
-    public ProductCustomAdapter(@NonNull Context context, @NonNull ArrayList<Product> data) {
+    public ProductCustomAdapter(@NonNull Context context, @NonNull ArrayList<ProductEntity> data) {
         this.mDataSet = data;
         this.mContext = context;
     }
@@ -51,15 +53,23 @@ public class ProductCustomAdapter extends RecyclerView.Adapter<ProductCustomAdap
         DecimalFormat decimalFormat = new DecimalFormat("#.00");
 
         holder.discountProduct.setText(String.format("%s%% \nOff", String.valueOf(discount)));
+
         if(discount==0){
             holder.discountProduct.setVisibility(View.GONE);
         }
+
         holder.nameProduct.setText(name);
         holder.nameProduct.setTypeface(null, Typeface.BOLD);
-        holder.listPriceProduct.setText(String.format("R$ %s", String.valueOf(decimalFormat.format(listPrice))));
-        holder.listPriceProduct.setPaintFlags(holder.listPriceProduct.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-        holder.listPriceProduct.setTextColor(Color.GRAY);
-        holder.listPriceProduct.setTypeface(null, Typeface.ITALIC);
+
+        if (listPrice > finalPrice) {
+            holder.listPriceProduct.setText(String.format("R$ %s", String.valueOf(decimalFormat.format(listPrice))));
+            holder.listPriceProduct.setPaintFlags(holder.listPriceProduct.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.listPriceProduct.setTextColor(Color.GRAY);
+            holder.listPriceProduct.setTypeface(null, Typeface.ITALIC);
+        } else {
+            holder.listPriceProduct.setVisibility(View.GONE);
+        }
+
         holder.finalPriceProduct.setText(String.format("R$ %s", String.valueOf(decimalFormat.format(finalPrice))));
         holder.finalPriceProduct.setTextColor(Color.GREEN);
         holder.bestInstallmentProduct.setText(String.format("%sx R$%s", String.valueOf(count), String.valueOf(decimalFormat.format(value))));

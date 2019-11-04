@@ -4,16 +4,19 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
+
+import com.google.android.material.navigation.NavigationView;
+
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,21 +39,28 @@ import java.util.Map;
 import java.util.Objects;
 
 import bruno.myapplication.Adapters.ProductCustomAdapter;
-import bruno.myapplication.api.ApiConnection;
+import bruno.myapplication.Api.ApiConnection;
+import bruno.myapplication.Entities.ProductEntity;
+import bruno.myapplication.Repository.ProductRepository;
 import bruno.myapplication.model.Product;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ArrayList<Product> products;
+    private ArrayList<ProductEntity> products;
     private ProductCustomAdapter adapter;
 
     private String query;
     private int offset=0;
     private final int size=10;
+    private final int spanSize = 2;
 
     private boolean loadingContentFlag;
+
+    private Context mContext;
+
+    ProductRepository productRepository;
 
 
     @Override
@@ -59,6 +69,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mContext = this.getApplicationContext();
 
         loadingContentFlag = false;
 
@@ -77,8 +89,24 @@ public class MainActivity extends AppCompatActivity
 
         adapter = new ProductCustomAdapter(getApplicationContext(), products);
 
+        setRecyclerViewProducts(mContext, adapter);
+
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            query = intent.getStringExtra(SearchManager.QUERY);
+            offset = 0;
+            products.clear();
+            adapter.notifyDataSetChanged();
+        }
+
+        productRepository = new ProductRepository(getApplicationContext());
+        getProducts(query, offset, size);
+    }
+
+    private void setRecyclerViewProducts(Context mContext, ProductCustomAdapter adapter) {
+
         final RecyclerView mRecyclerView = findViewById(R.id.recyclerview_id);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(mContext, spanSize));
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -101,14 +129,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        Intent intent = getIntent();
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            query = intent.getStringExtra(SearchManager.QUERY);
-            offset=0;
-            products.clear();
-            adapter.notifyDataSetChanged();
-        }
-        getProducts(query, offset, size);
     }
 
     @Override
@@ -199,15 +219,9 @@ public class MainActivity extends AppCompatActivity
 
                             int discount = (int) ((listPrice - finalPrice)/listPrice*100);
 
-                            Product product = new Product(discount,
-                                    name,
-                                    listPrice,
-                                    finalPrice,
-                                    count,
-                                    value,
-                                    thumbnail);
 
-                            products.add(product);
+                            productRepository.insertProduct(discount, thumbnail, name, listPrice, finalPrice, count, value);
+
                         }
                         adapter.notifyDataSetChanged();
                     } catch (JSONException e) {

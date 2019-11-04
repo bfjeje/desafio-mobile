@@ -23,7 +23,7 @@ public class SubCategoryCustomAdapter extends ArrayAdapter<String> {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.category_item, parent, false);
         }
-        TextView subCategoryName = convertView.findViewById(R.id.text1);
+        TextView subCategoryName = convertView.findViewById(R.id.textViewCategoryName);
         subCategoryName.setText(subCategory);
 
         return convertView;

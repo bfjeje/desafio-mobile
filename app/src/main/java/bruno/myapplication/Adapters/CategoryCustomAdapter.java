@@ -25,7 +25,7 @@ public class CategoryCustomAdapter extends ArrayAdapter<Category> {
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.category_item, parent, false);
         }
-        TextView categoryName = convertView.findViewById(R.id.text1);
+        TextView categoryName = convertView.findViewById(R.id.textViewCategoryName);
         categoryName.setText(Objects.requireNonNull(category).getName());
 
         return convertView;

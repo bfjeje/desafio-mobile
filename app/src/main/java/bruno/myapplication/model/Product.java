@@ -2,9 +2,11 @@ package bruno.myapplication.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 public class Product implements Parcelable {
+    private int id;
     private int discount;
     private String thumbnail;
     private String name;
